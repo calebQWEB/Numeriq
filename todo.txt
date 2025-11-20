@@ -1,0 +1,106 @@
+chat_history:
+    id
+    file_id
+    analysis_id
+    user_id
+    question
+    answer
+    created_at
+
+file_analyses
+    id
+    file_id
+    user_id
+    raw_text
+    description
+    created_at
+    status
+    insights
+
+profiles
+    id
+    email
+    full_name
+    company_name
+    created_at
+    updated_at
+
+uploaded_files
+    id
+    user_id
+    file_name
+    file_path
+    file_size
+    file_type
+    spreadsheet_type
+    uploaded_date
+    status
+    analysis_id
+
+create table subscriptions (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users not null,
+  status text check (status in ('active','inactive','canceled')) default 'inactive',
+  plan text check (plan in ('free','pro','enterprise')) default 'free',
+  started_at timestamp default now(),
+  expires_at timestamp
+);
+
+
+-- Allow authenticated users to read only their own files
+create policy "Users can read own files"
+on storage.objects for select
+using (
+  auth.role() = 'authenticated'
+  and bucket_id = 'spreadsheets'
+  and owner = auth.uid()
+);
+
+-- Allow authenticated users to insert files (tagging themselves as owner)
+create policy "Users can insert own files"
+on storage.objects for insert
+with check (
+  auth.role() = 'authenticated'
+  and bucket_id = 'spreadsheets'
+  and owner = auth.uid()
+);
+
+-- Allow authenticated users to update only their own files
+create policy "Users can update own files"
+on storage.objects for update
+using (
+  auth.role() = 'authenticated'
+  and bucket_id = 'spreadsheets'
+  and owner = auth.uid()
+);
+
+-- Allow authenticated users to delete only their own files
+create policy "Users can delete own files"
+on storage.objects for delete
+using (
+  auth.role() = 'authenticated'
+  and bucket_id = 'spreadsheets'
+  and owner = auth.uid()
+);
+
+curl -X POST http://localhost:8000/webhook/flutterwave \
+-H "verif-hash: FLWSECK_TEST-f3f2aed11d7daca58fbd29935486cf28-X" \
+-H "Content-Type: application/json" \
+-d '{"event":"charge.completed","data":{"meta":{"user_id":"c0b24bfb-9568-41cb-bb18-c98410916900","plan":"plus"},"tx_ref":"tx_123"}}'
+
+curl -X POST http://localhost:8000/webhook/flutterwave -H "verif-hash: FLWSECK_TEST-f3f2aed11d7daca58fbd29935486cf28-X" -H "Content-Type: application/json" -d '{"event":"charge.completed","data":{"meta":{"user_id":"c0b24bfb-9568-41cb-bb18-c98410916900","plan":"plus"},"tx_ref":"tx_123"}}'
+
+Invoke-WebRequest -Uri https://d35d8dbc6a53.ngrok-free.app/webhook/flutterwave -Method POST -Headers @{ "verif-hash" = "FLWSECK_TEST-f3f2aed11d7daca58fbd29935486cf28-X"; "Content-Type" = "application/json" } -Body '{"event":"charge.completed","data":{"meta":{"user_id":"c0b24bfb-9568-41cb-bb18-c98410916900","plan":"plus"},"tx_ref":"tx_123"}}'
+
+curl -X POST https://d35d8dbc6a53.ngrok-free.app/webhook/flutterwave -H "Content-Type: application/json" -H "verif-hash: mZk9K1h1qP8vT2r6xYz0uG4bN6pQwE7s==" -d '{"event":"charge.completed","data":{"id":123456,"tx_ref":"test-tx-001","amount":100,"currency":"NGN","meta":{"user_id":"user_abc123","plan":"plus"}}}'
+
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+uvicorn app.main:app --reload 
+
+{"error": "Error code: 400 - {\"message\": \"This model's maximum context length is 32768 tokens. However, you requested 120295 tokens (119995 in the messages, 300 in the completion). Please reduce the length of the messages or completion.\", \"type_\": \"invalid_request_error\"}", "event": "Insight generation failed", "timestamp": "2025-09-20T13:02:39.950089Z", "level": "error"}
+
+
+Observe the codes below: One is the analysis Service for a Sales Spreadsheet and the chatService for a sales spreadsheet as well. I want you to modify the ChatService to answer not just based on computed insights but based on raw json data as well. Subsequently I would require you to create ChatServices for other spreadsheet type. But NOT before I give you the analysis service for that spreadsheet type
+
+First off: Sales Spreasheet
